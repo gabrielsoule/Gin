@@ -235,7 +235,7 @@ protected:
 
         if (headers.size() > 0)
         {
-            auto w = 50;
+            auto w = headerTabButtonWidth;
             auto rh = header.getLocalBounds().withSizeKeepingCentre (w * headers.size(), header.getHeight());
 
             for (auto h : headers)
@@ -261,6 +261,7 @@ protected:
     juce::OwnedArray<HeaderButton> headers;
     gin::Parameter::Ptr headerParam = nullptr;
     int headerIndex = 0;
+    int headerTabButtonWidth = 50;
 };
 
 //==============================================================================
