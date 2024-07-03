@@ -36,9 +36,9 @@ private:
         g.setColour (findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.15f));
         g.fillRect (rc.removeFromTop (1));
 
-        auto f = juce::Font (juce::FontOptions()).withPointHeight (10.0).withExtraKerningFactor (0.25);
-
         g.setColour (findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
+        auto f = juce::Font (juce::FontOptions().withName("Futura").withPointHeight (14.0).withKerningFactor (0.08));
+        g.setFont(f);
         g.drawText (name.toUpperCase(), getLocalBounds(), juce::Justification::centred);
     }
 
@@ -86,9 +86,9 @@ public:
 private:
     void paintButton (juce::Graphics& g, bool, bool) override
     {
-        auto f = juce::Font (juce::FontOptions()).withPointHeight (10.0).withExtraKerningFactor (0.25);
-
-        g.setColour (getToggleState() ? findColour (PluginLookAndFeel::accentColourId).withAlpha (0.6f) : findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
+        auto f = juce::Font (juce::FontOptions().withName("Futura").withPointHeight (14.0).withKerningFactor (0.08));
+        g.setFont(f);
+        g.setColour (getToggleState() ? findColour (PluginLookAndFeel::accentColourId).brighter(0.1) : findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
         g.drawText (getButtonText().toUpperCase(), getLocalBounds(), juce::Justification::centred);
     }
 
@@ -216,13 +216,13 @@ protected:
 
     void paint (juce::Graphics& g) override
     {
-        auto rc = getLocalBounds().withTrimmedTop (23);
+        auto rc = getLocalBounds().withTrimmedTop (28);
         gradientRect (g, rc, findColour (PluginLookAndFeel::matte1ColourId), findColour (PluginLookAndFeel::matte2ColourId));
     }
 
     void resized() override
     {
-        header.setBounds (getLocalBounds().removeFromTop (23));
+        header.setBounds (getLocalBounds().removeFromTop (28));
         frame.setBounds (getLocalBounds());
 
         auto rc = header.getLocalBounds ().withSizeKeepingCentre (header.getWidth() - 6, 12);
