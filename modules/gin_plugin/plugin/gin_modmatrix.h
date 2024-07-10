@@ -39,18 +39,27 @@ public:
 
     /* Gets value of a parameter with modulation applied */
     inline float getValue (gin::Parameter* p);
+    inline float getValue(gin::Parameter* p, int channel);
     inline float getValueUnsmoothed (gin::Parameter* p);
+    inline float getValueUnsmoothed(gin::Parameter* p, int channel);
 
     void finishBlock (int numSamples)
     {
         for (auto& s : smoothers)
-            s.process (numSamples);
+        {
+            s[0].process (numSamples);
+            s[1].process (numSamples);
+        }
+
     }
 
     void snapParams()
     {
         for (auto& s : smoothers)
-            s.snapToValue();
+        {
+            s[0].snapToValue();
+            s[1].snapToValue();
+        }
     }
 
     void startVoice ();
@@ -67,8 +76,8 @@ private:
     friend ModMatrix;
 
     ModMatrix* owner = nullptr;
-    juce::Array<float> values;
-    juce::Array<ValueSmoother<float>> smoothers;
+    juce::Array<std::array<float, 2>> values;
+    juce::Array<std::array<ValueSmoother<float>, 2>> smoothers;
     int age = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ModVoice)
@@ -204,8 +213,7 @@ public:
         return v;
     }
 
-    //==============================================================================
-    float getValue (gin::Parameter* p, bool smoothed = true)
+    float getValue(gin::Parameter* p, int channel, bool smoothed = true)
     {
         const int paramId = p->getModIndex();
 
@@ -217,14 +225,14 @@ public:
             if (src.enabled)
             {
                 if (src.poly && activeVoice != nullptr)
-                    base += shape (activeVoice->values[src.id.id], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                    base += shape (activeVoice->values[src.id.id][channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                 else if (! src.poly)
-                    base += shape (sources[src.id.id].monoValue, src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                    base += shape (sources[src.id.id].monoValues[channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
             }
         }
 
         base = juce::jlimit (0.0f, 1.0f, base);
-        auto& smoother = smoothers.getReference (paramId);
+        auto& smoother = smoothers.getReference (paramId)[channel];
 
         smoother.setValue (base);
         auto v = smoothed ? smoother.getCurrentValue() : base;
@@ -237,7 +245,13 @@ public:
         return v;
     }
 
-    float getValue (ModVoice& voice, gin::Parameter* p, bool smoothed = true)
+    //==============================================================================
+    float getValue (gin::Parameter* p, bool smoothed = true)
+    {
+        return getValue(p, 0, smoothed);
+    }
+
+    float getValue(ModVoice& voice, gin::Parameter* p, int channel, bool smoothed = true)
     {
         const int paramId = p->getModIndex();
         jassert (paramId >= 0);
@@ -250,14 +264,14 @@ public:
             if (src.enabled)
             {
                 if (src.poly)
-                    base += shape (voice.values[src.id.id], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                    base += shape (voice.values[src.id.id][channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                 else
-                    base += shape (sources[src.id.id].monoValue, src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                    base += shape (sources[src.id.id].monoValues[channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
             }
         }
 
         base = juce::jlimit (0.0f, 1.0f, base);
-        auto& smoother = voice.smoothers.getReference (paramId);
+        auto& smoother = voice.smoothers.getReference (paramId)[channel];
 
         smoother.setValue (base);
         auto v = (voice.disableSmoothing || ! smoothed) ? base : smoother.getCurrentValue();
@@ -268,9 +282,15 @@ public:
             v = p->conversionFunction (v);
 
         return v;
+
     }
 
-    juce::Array<float> getLiveValues (gin::Parameter* p)
+    float getValue (ModVoice& voice, gin::Parameter* p, bool smoothed = true)
+    {
+        return getValue(voice, p, 0, smoothed);
+    }
+
+    juce::Array<float> getLiveValues (gin::Parameter* p, int channel)
     {
         juce::Array<float> liveValues;
 
@@ -293,9 +313,9 @@ public:
                         if (src.enabled)
                         {
                             if (src.poly)
-                                base += shape (v->values[src.id.id], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                                base += shape (v->values[src.id.id][channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                             else
-                                base += shape (sources[src.id.id].monoValue, src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                                base += shape (sources[src.id.id].monoValues[channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                             ok = true;
                         }
                     }
@@ -317,7 +337,7 @@ public:
                 {
                     if (src.enabled && ! src.poly)
                     {
-                        base += shape (sources[src.id.id].monoValue, src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                        base += shape (sources[src.id.id].monoValues[channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                         ok = true;
                     }
                 }
@@ -344,12 +364,12 @@ public:
                     if (src.poly && v != nullptr)
                     {
                         ok = true;
-                        base += shape (v->values[src.id.id], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                        base += shape (v->values[src.id.id][channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                     }
                     else if (! src.poly)
                     {
                         ok = true;
-                        base += shape (sources[src.id.id].monoValue, src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
+                        base += shape (sources[src.id.id].monoValues[channel], src.function, sources[src.id.id].bipolar, src.biPolarMapping) * src.depth;
                     }
                 }
             }
@@ -364,24 +384,44 @@ public:
         return liveValues;
     }
 
-    void setMonoValue (ModSrcId id, float value)
+    juce::Array<float> getLiveValues (gin::Parameter* p)
     {
+        return getLiveValues(p, 0);
+    }
+
+    void setMonoValue (ModSrcId id, float value, int channel)
+    {
+        jassert(channel == 0 || channel == 1);
         auto& info = sources.getReference (id.id);
         jassert (! info.poly);
 
-        info.monoValue = value;
+        info.monoValues[channel] = value;
+    }
+
+    void setMonoValue (ModSrcId id, float value)
+    {
+        setMonoValue(id, value, 0);
+    }
+
+    void setPolyValue(ModVoice& voice, ModSrcId id, float value, int channel)
+    {
+        jassert (sources.getReference (id.id).poly);
+        voice.values.getReference(id.id)[channel] = value;
     }
 
     void setPolyValue (ModVoice& voice, ModSrcId id, float value)
     {
-        jassert (sources.getReference (id.id).poly);
-        voice.values.setUnchecked (id.id, value);
+        setPolyValue(voice, id, value, 0);
     }
 
     void finishBlock (int numSamples)
     {
         for (auto& s : smoothers)
-            s.process (numSamples);
+        {
+            s[0].process (numSamples);
+            s[1].process(numSamples);
+        }
+
     }
 
     //==============================================================================
@@ -473,8 +513,9 @@ private:
         juce::String name;
         bool poly = false;
         bool bipolar = false;
+        bool stereo = false;
         ModSrcId index = {};
-        float monoValue = 0.0f;
+        float monoValues[2];
     };
 
     struct Source
@@ -482,6 +523,7 @@ private:
         ModSrcId id = {};
         bool poly = false;
         bool enabled = true;
+        bool stereo = false;
         float depth = 0.0f;
         bool biPolarMapping = false;
         Function function = ModMatrix::Function::linear;
@@ -499,7 +541,7 @@ private:
     juce::Array<SourceInfo> sources;
     juce::Array<ParamInfo> parameters;
     juce::Array<ModVoice*> voices;
-    juce::Array<ValueSmoother<float>> smoothers;
+    juce::Array<std::array<ValueSmoother<float>, 2>> smoothers;
     ModVoice* activeVoice = nullptr;
     bool onlyShowModWhenVoiceActive = false;
     PolarityMode defaultPolarityMode = sameAsSource;
@@ -519,7 +561,17 @@ inline float ModVoice::getValue (gin::Parameter* p)
     return owner->getValue (*this, p);
 }
 
+inline float ModVoice::getValue (gin::Parameter* p, int channel)
+{
+    return owner->getValue (*this, p, channel);
+}
+
 inline float ModVoice::getValueUnsmoothed (gin::Parameter* p)
 {
     return owner->getValue (*this, p, false);
+}
+
+inline float ModVoice::getValueUnsmoothed(gin::Parameter* p, int channel)
+{
+    return owner->getValue(*this, p, channel, false);
 }

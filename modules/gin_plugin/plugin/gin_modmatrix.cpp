@@ -213,8 +213,10 @@ void ModMatrix::setSampleRate (double sr)
 
     for (auto idx = 0; auto& s : smoothers)
     {
-        s.setSampleRate (sr);
-        s.setTime (parameters[idx].smoothingTime);
+        s[0].setSampleRate (sr);
+        s[1].setSampleRate (sr);
+        s[0].setTime (parameters[idx].smoothingTime);
+        s[1].setTime (parameters[idx].smoothingTime);
         idx++;
     }
 
@@ -222,8 +224,10 @@ void ModMatrix::setSampleRate (double sr)
     {
         for (auto idx = 0; auto& s : v->smoothers)
         {
-            s.setSampleRate (sr);
-            s.setTime (parameters[idx].smoothingTime);
+            s[0].setSampleRate (sr);
+            s[1].setSampleRate (sr);
+            s[0].setTime (parameters[idx].smoothingTime);
+            s[1].setTime (parameters[idx].smoothingTime);
             idx++;
         }
     }
