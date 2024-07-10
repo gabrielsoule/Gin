@@ -27,6 +27,8 @@ public:
         repaint();
     }
 
+    bool enabled;
+
 private:
     void paint (juce::Graphics& g)
     {
@@ -36,13 +38,14 @@ private:
         g.setColour (findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.15f));
         g.fillRect (rc.removeFromTop (1));
 
-        g.setColour (findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
+        g.setColour (enabled ? findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.7f) : findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.5f));
         auto f = juce::Font (juce::FontOptions().withName("Futura").withPointHeight (14.0).withKerningFactor (0.08));
         g.setFont(f);
         g.drawText (name.toUpperCase(), getLocalBounds(), juce::Justification::centred);
     }
 
     juce::String name;
+    int nameWidth;
 };
 
 //==============================================================================
@@ -56,6 +59,7 @@ public:
     HeaderButton (const juce::String& name_)
         : juce::Button (name_)
     {
+        stringLength = std::round(juce::Font (juce::FontOptions().withName("Futura").withPointHeight (13.0).withKerningFactor (0.08)).getStringWidthFloat(name_));
     }
     
     bool isInterestedInDragSource (const SourceDetails&) override
@@ -86,11 +90,28 @@ public:
 private:
     void paintButton (juce::Graphics& g, bool, bool) override
     {
-        auto f = juce::Font (juce::FontOptions().withName("Futura").withPointHeight (14.0).withKerningFactor (0.08));
+        auto f = juce::Font (juce::FontOptions().withName("Futura").withPointHeight (13.0).withKerningFactor (0.08));
         g.setFont(f);
-        g.setColour (getToggleState() ? findColour (PluginLookAndFeel::accentColourId).brighter(0.1) : findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
+        if(getToggleState())
+        {
+            g.setColour(findColour (PluginLookAndFeel::accentColourId).brighter(0.1));
+        }
+        else
+        {
+            if(isMouseOver())
+            {
+                g.setColour(findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.8f));
+            }
+            else
+            {
+                g.setColour(findColour (PluginLookAndFeel::whiteColourId).withAlpha (0.6f));
+            }
+        }
         g.drawText (getButtonText().toUpperCase(), getLocalBounds(), juce::Justification::centred);
+        if(getToggleState()) g.fillRect (juce::Rectangle<int> (getWidth() / 2 - stringLength / 2, getBottom() - 2, stringLength - 3, 2));
     }
+
+    int stringLength;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderButton)
 };
@@ -148,7 +169,7 @@ public:
         if (includeButton)
         {
             auto b = new SVGPluginButton (p, Assets::power);
-            b->setBounds (6, 6, 12, 12);
+            b->setBounds (8, 8, 12, 12);
             controls.add (b);
             addAndMakeVisible (b);
         }
@@ -200,6 +221,7 @@ protected:
         if (enableParam)
         {
             frame.setEnabled (enableParam->getUserValue() > 0.0f);
+            header.enabled = enableParam->getUserValue() > 0.0f;
             for (auto ms : modSources)
                 ms->setEnabled (enableParam->getUserValue() > 0.0f);
         }
@@ -216,13 +238,13 @@ protected:
 
     void paint (juce::Graphics& g) override
     {
-        auto rc = getLocalBounds().withTrimmedTop (28);
+        auto rc = getLocalBounds().withTrimmedTop (titleBarHeight);
         gradientRect (g, rc, findColour (PluginLookAndFeel::matte1ColourId), findColour (PluginLookAndFeel::matte2ColourId));
     }
 
     void resized() override
     {
-        header.setBounds (getLocalBounds().removeFromTop (28));
+        header.setBounds (getLocalBounds().removeFromTop (titleBarHeight));
         frame.setBounds (getLocalBounds());
 
         auto rc = header.getLocalBounds ().withSizeKeepingCentre (header.getWidth() - 6, 12);
@@ -245,12 +267,12 @@ protected:
 
     juce::Rectangle<int> getGridArea (int x, int y, int cx = 1, int cy = 1)
     {
-        return { x * 56, 23 + y * 70, cx * 56, cy * 70 };
+        return { gridOffsetX + x * gridWidth, gridOffsetY + titleBarHeight + y * gridHeight, cx * gridWidth, cy * gridHeight };
     }
 
     juce::Rectangle<int> getGridArea (float x, float y, float cx = 1.0f, float cy = 1.0f)
     {
-        return { int (x * 56), int (23 + y * 70), int (cx * 56), int (cy * 70) };
+        return { int (gridOffsetX + x * gridWidth), int (gridOffsetY + titleBarHeight + y * gridHeight), int (cx * gridWidth), int (cy * gridHeight) };
     }
 
     ParamHeader header;
@@ -261,7 +283,13 @@ protected:
     juce::OwnedArray<HeaderButton> headers;
     gin::Parameter::Ptr headerParam = nullptr;
     int headerIndex = 0;
+
     int headerTabButtonWidth = 50;
+    int titleBarHeight = 28;
+    int gridWidth = 56 * 0.93f;
+    int gridHeight = 70 * 0.93f;
+    int gridOffsetX = 8;
+    int gridOffsetY = 4;
 };
 
 //==============================================================================
