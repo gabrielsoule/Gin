@@ -179,7 +179,7 @@ public:
 
     void addModSource (juce::Component* c)
     {
-        c->setSize (12, 12);
+        c->setSize (15, 15);
         modSources.add (c);
         addAndMakeVisible (c);
     }
@@ -247,11 +247,11 @@ protected:
         header.setBounds (getLocalBounds().removeFromTop (titleBarHeight));
         frame.setBounds (getLocalBounds());
 
-        auto rc = header.getLocalBounds ().withSizeKeepingCentre (header.getWidth() - 6, 12);
+        auto rc = header.getLocalBounds ().withSizeKeepingCentre (header.getWidth() - 6, 15);
 
         for (auto c : modSources)
         {
-            c->setBounds (rc.removeFromRight (12));
+            c->setBounds (rc.removeFromRight (15));
             rc.removeFromRight (4);
         }
 
@@ -285,6 +285,7 @@ protected:
     int headerIndex = 0;
 
     int headerTabButtonWidth = 50;
+    int titleBarButtonSize = 15;
     int titleBarHeight = 28;
     int gridWidth = 56 * 0.93f;
     int gridHeight = 70 * 0.93f;

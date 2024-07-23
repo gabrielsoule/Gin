@@ -265,7 +265,7 @@ public:
         setName ("modlist");
         setModel (this);
         updateContent();
-        setRowHeight (16);
+        setRowHeight (20);
     }
 
     int getNumRows() override
@@ -376,7 +376,7 @@ public:
     {
         setName ("matrix");
         setModel (this);
-        setRowHeight (16);
+        setRowHeight (20);
         refresh();
 
         modMatrix.addListener (this);
