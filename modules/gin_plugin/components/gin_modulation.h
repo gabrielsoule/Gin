@@ -443,7 +443,7 @@ private:
             depth.getProperties().set ("fullRect", true);
             depth.addListener (this);
             depth.setSliderSnapsToMousePosition (false);
-            depth.setMouseDragSensitivity (750);
+            depth.setMouseDragSensitivity (1250);
             depth.setPopupDisplayEnabled (true, true, findParentComponentOfClass<juce::AudioProcessorEditor>());
             depth.setDoubleClickReturnValue (true, 0.0);
             depth.onValueChange = [this]

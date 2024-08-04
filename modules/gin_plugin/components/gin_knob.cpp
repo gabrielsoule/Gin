@@ -46,7 +46,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
         auto& mm = *parameter->getModMatrix();
         if (mm.shouldShowLiveModValues())
         {
-            auto curModValues = liveValuesCallback ? liveValuesCallback() : mm.getLiveValues (parameter);
+            auto curModValues = liveValuesCallback ? liveValuesCallback() : mm.getLiveValues (parameter, 0);
             if (curModValues != modValues)
             {
                 modValues = curModValues;
@@ -59,10 +59,26 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
                 repaint();
             }
+
+            //do the same thing, but for the right channel. To keep backwards compatability we don't rename modValues, or mess with it
+            auto curModValuesR = liveValuesCallback ? liveValuesCallback() : mm.getLiveValues (parameter, 1);
+            if (curModValuesR != modValuesR)
+            {
+                modValuesR = curModValuesR;
+
+                juce::Array<juce::var> vals;
+                for (auto v : modValuesR)
+                    vals.add (v);
+
+                knob.getProperties().set ("modValuesR", vals);
+
+                repaint();
+            }
         }
         else if (knob.getProperties().contains ("modValues"))
         {
             knob.getProperties().remove ("modValues");
+            knob.getProperties().remove("modValuesR");
             repaint();
         }
     };

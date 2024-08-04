@@ -54,8 +54,9 @@ protected:
     gin::CoalescedTimer modTimer;
     gin::CoalescedTimer shiftTimer;
     juce::Array<float> modValues;
+    juce::Array<float> modValuesR;
     std::function<juce::Array<float> ()> liveValuesCallback;
     gin::ModulationDepthSlider modDepthSlider;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Knob)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Knob)
 };

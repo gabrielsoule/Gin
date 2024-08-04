@@ -14,7 +14,7 @@ public:
 
     void setParams (Parameter::Ptr wave, Parameter::Ptr sync, Parameter::Ptr rate,
                     Parameter::Ptr beat, Parameter::Ptr depth, Parameter::Ptr offset,
-                    Parameter::Ptr phase, Parameter::Ptr enable);
+                    Parameter::Ptr phase, Parameter::Ptr enable, Parameter::Ptr stereo);
     
     std::function<std::vector<float>()> phaseCallback;
 
@@ -28,13 +28,15 @@ private:
     float getSample (float phase);
     int getNumSteps();
 
-    Parameter::Ptr wave, sync, rate, beat, depth, offset, phase, enable;
+    Parameter::Ptr wave, sync, rate, beat, depth, offset, phase, enable, stereo;
 
-    LFO lfo;
+    LFO lfoL;
+    LFO lfoR;
     juce::Path path;
     bool dirty = true;
     std::vector<float> curPhases;
     std::map<int,float> curve;
+    float phaseOffset;
 
 private:
     bool unclamped = false;

@@ -84,6 +84,7 @@ void MSEGComponent::createPath()
 void MSEGComponent::paint (juce::Graphics& g)
 {
     auto rc = getArea();
+    g.fillRoundedRectangle(rc, 15);
 
     if (dirty)
     {
@@ -103,15 +104,29 @@ void MSEGComponent::paint (juce::Graphics& g)
         
         for (int i = 0; i <= xgrid->getUserValueInt(); i++)
             rects.add ({rc.getX() + i * rc.getWidth() / xgrid->getUserValueInt(), rc.getY(), 1, rc.getHeight()});
+
+        for (int i = 1; i < ygrid->getUserValueInt(); i++)
+        {
+            float y = rc.getY() + i * rc.getHeight() / ygrid->getUserValueInt();
+            g.drawLine(rc.getX(), y, rc.getRight(), y, 1.0f);
+        }
+
+        // Draw vertical lines
+        for (int i = 1; i < xgrid->getUserValueInt(); i++)
+        {
+            float x = rc.getX() + i * rc.getWidth() / xgrid->getUserValueInt();
+            g.drawLine(x, rc.getY(), x, rc.getBottom(), 1.0f);
+        }
     }
     else
     {
         rects.add ({rc.getX(), rc.getCentreY(), rc.getWidth(), 1});
+        g.fillRectList (rects);
     }
 
-    g.fillRectList (rects);
 
-    auto c = findColour (GinLookAndFeel::accentColourId).withAlpha (0.7f);
+
+    auto c = findColour (GinLookAndFeel::accentColourId).withAlpha (1.0f);
 
     g.setColour (dimIfNeeded (c));
     g.strokePath (path, juce::PathStrokeType (1.5f));

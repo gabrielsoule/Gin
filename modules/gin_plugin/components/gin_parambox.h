@@ -287,9 +287,9 @@ protected:
     int headerTabButtonWidth = 50;
     int titleBarButtonSize = 15;
     int titleBarHeight = 28;
-    int gridWidth = 56 * 0.93f;
-    int gridHeight = 70 * 0.93f;
-    int gridOffsetX = 8;
+    int gridWidth = 52;
+    int gridHeight = 65;
+    int gridOffsetX = 4;
     int gridOffsetY = 4;
 };
 
