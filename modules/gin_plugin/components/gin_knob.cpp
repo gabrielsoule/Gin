@@ -187,7 +187,7 @@ void Knob::resized()
 
     name.setBounds (rc);
     value.setBounds (rc);
-    knob.setBounds (r.reduced (2));
+    knob.setBounds (r.reduced (internalKnobReduction));
 
     modDepthSlider.setBounds (knob.getBounds().removeFromTop (7).removeFromRight (7).reduced (-3));
 }

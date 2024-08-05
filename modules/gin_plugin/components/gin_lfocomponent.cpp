@@ -81,6 +81,8 @@ void LFOComponent::createPath (juce::Rectangle<int> area)
 
 void LFOComponent::paint (juce::Graphics& g)
 {
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 10);
     auto rc = getLocalBounds().reduced (2);
 
     if (dirty)
@@ -89,8 +91,8 @@ void LFOComponent::paint (juce::Graphics& g)
         createPath (rc);
     }
 
-    g.setColour (dimIfNeeded (findColour (GinLookAndFeel::whiteColourId).withAlpha (0.3f)));
-    g.fillRect (rc.getX(), rc.getCentreY(), rc.getWidth(), 1);
+    // g.setColour (dimIfNeeded (findColour (GinLookAndFeel::whiteColourId).withAlpha (0.3f)));
+    // g.fillRect (rc.getX(), rc.getCentreY(), rc.getWidth(), 1);
 
     auto c = findColour (GinLookAndFeel::accentColourId).withAlpha (1.0f);
 
@@ -119,6 +121,9 @@ void LFOComponent::paint (juce::Graphics& g)
             g.fillEllipse (rc.getX() + x - 2, y - 2, 4, 4);
         }
     }
+
+    //draw a black rectangle around the background
+
 }
 
 void LFOComponent::timerCallback()

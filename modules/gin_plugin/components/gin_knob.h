@@ -36,6 +36,8 @@ public:
     void itemDragExit (const SourceDetails& dragSourceDetails) override;
     void itemDropped (const SourceDetails& dragSourceDetails) override;
 
+    int internalKnobReduction = 2;
+
 protected:
     void timerCallback() override;
 

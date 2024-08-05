@@ -52,6 +52,8 @@ void ADSRComponent::timerCallback()
 
 void ADSRComponent::paint (juce::Graphics& g)
 {
+    g.setColour(juce::Colours::black);
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), 10);
     auto c = findColour (GinLookAndFeel::accentColourId).withAlpha (0.7f);
 
     auto a = getArea();
