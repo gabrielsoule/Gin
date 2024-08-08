@@ -65,6 +65,15 @@ public:
         parameter->addListener (this);
     }
 
+    SVGPluginButton (Parameter* parameter_, const juce::String& svg, const juce::String& svgEnabled)
+      : SVGButton (parameter_->getShortName(), svg, svgEnabled), parameter (parameter_)
+    {
+        setButtonText (parameter->getUserValueText());
+        setToggleState (parameter->getUserValue() > 0.0f, juce::dontSendNotification);
+
+        parameter->addListener (this);
+    }
+
     ~SVGPluginButton() override
     {
         parameter->removeListener (this);
