@@ -3,13 +3,14 @@
 Knob::Knob (Parameter* p, bool fromCentre)
   : ParamComponent (p),
     value (parameter),
-    knob (parameter, juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox)
+    knob (parameter, juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox),
+    internalKnobReduction(3)
 {
     addAndMakeVisible (name);
     addAndMakeVisible (value);
     addAndMakeVisible (knob);
     addChildComponent (modDepthSlider);
-    
+
     modDepthSlider.setRange (-1.0, 1.0, 0.0);
     modDepthSlider.setPopupDisplayEnabled (true, true, findParentComponentOfClass<juce::AudioProcessorEditor>());
     modDepthSlider.setDoubleClickReturnValue (true, 0.0);
@@ -179,7 +180,7 @@ void Knob::paint (juce::Graphics& g)
 
 void Knob::resized()
 {
-    auto r = getLocalBounds().reduced (2);
+    auto r = getLocalBounds();
 
     auto extra = r.getHeight() - r.getWidth();
 
@@ -187,7 +188,7 @@ void Knob::resized()
 
     name.setBounds (rc);
     value.setBounds (rc);
-    knob.setBounds (r.reduced (internalKnobReduction));
+    knob.setBounds (r.reduced (internalKnobReduction + 2));
 
     modDepthSlider.setBounds (knob.getBounds().removeFromTop (7).removeFromRight (7).reduced (-3));
 }
