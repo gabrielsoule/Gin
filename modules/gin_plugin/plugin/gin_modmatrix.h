@@ -248,6 +248,7 @@ public:
     //==============================================================================
     float getValue (gin::Parameter* p, bool smoothed = true)
     {
+        jassert(!p->isInternal()); // Internal parameters should not be modulated
         return getValue(p, 0, smoothed);
     }
 
@@ -558,6 +559,7 @@ private:
 
 inline float ModVoice::getValue (gin::Parameter* p)
 {
+    jassert(!p->isInternal()); // Internal parameters should not be modulated
     return owner->getValue (*this, p);
 }
 
