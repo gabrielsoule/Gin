@@ -125,6 +125,8 @@ public:
     juce::String getName (int maximumStringLength) const override;
     juce::String getShortName() const               { return shortName; }
     juce::String getLabel() const override          { return label; }
+    juce::String getTooltip() const                 { return tooltip; }
+    void setTooltip (juce::String t)                { tooltip = t; }
 
     int getNumSteps() const override;
     juce::String getText (float value, int /*maximumStringLength*/) const override;
@@ -159,6 +161,7 @@ protected:
     juce::String name;
     juce::String shortName;
     juce::String label;
+    juce::String tooltip;
 
     std::function<juce::String (const Parameter&, float)> textFunction;
 
