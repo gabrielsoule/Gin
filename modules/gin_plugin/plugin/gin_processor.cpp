@@ -123,6 +123,7 @@ void Processor::addPluginParameter (gin::Parameter* p)
 std::unique_ptr<gin::Parameter> Processor::createParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                                         juce::NormalisableRange<float> range, float defaultValue,
                                                         SmoothingType st,
+                                                        juce::String tooltipPath,
                                                         std::function<juce::String (const gin::Parameter&, float)> textFunction)
 {
     std::unique_ptr<gin::Parameter> p;
@@ -145,6 +146,7 @@ std::unique_ptr<gin::Parameter> Processor::createParam (juce::String uid, juce::
     else
     {
         p = std::make_unique<gin::Parameter> (*this, uid, name, shortName, label, range, defaultValue, textFunction);
+        if(! tooltipPath.isEmpty()) p->setTooltip(getTooltip(tooltipPath));
     }
 
     jassert (p != nullptr);
@@ -154,11 +156,21 @@ std::unique_ptr<gin::Parameter> Processor::createParam (juce::String uid, juce::
 gin::Parameter* Processor::addIntParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                         juce::NormalisableRange<float> range, float defaultValue,
                                         SmoothingType st,
+                                        juce::String tooltipPath,
                                         std::function<juce::String (const gin::Parameter&, float)> textFunction)
 {
     jassert (! parameterMap.contains (uid));
 
-    if (auto p = createParam (uid, name, shortName, label, range, defaultValue, st, textFunction))
+    if (auto p = createParam (
+        uid,
+        name,
+        shortName,
+        label,
+        range,
+        defaultValue,
+        st,
+        tooltipPath,
+        textFunction))
     {
         auto rawPtr = p.get();
         p->setInternal (true);
@@ -173,11 +185,12 @@ gin::Parameter* Processor::addIntParam (juce::String uid, juce::String name, juc
 gin::Parameter* Processor::addExtParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                         juce::NormalisableRange<float> range, float defaultValue,
                                         SmoothingType st,
+                                        juce::String tooltipPath,
                                         std::function<juce::String (const gin::Parameter&, float)> textFunction)
 {
     jassert (! parameterMap.contains (uid));
 
-    if (auto p = createParam (uid, name, shortName, label, range, defaultValue, st, textFunction))
+    if (auto p = createParam (uid, name, shortName, label, range, defaultValue, st, tooltipPath, textFunction))
     {
         auto rawPtr = p.get();
         allParameters.add (rawPtr);
@@ -615,3 +628,65 @@ void Processor::setStateXml (const juce::String& text)
 
     lastStateLoad = juce::Time::getCurrentTime();
 }
+
+void TooltipManager::loadFromJsonString(const juce::String json)
+{
+    tooltipData = juce::JSON::parse(json);
+}
+
+void TooltipManager::loadFromJson(juce::var json)
+{
+    tooltipData = json;
+}
+
+
+juce::String TooltipManager::getTooltip(const juce::String path) const
+{
+    juce::StringArray keys;
+    keys.addTokens (path, ".", "");
+
+    // Start with the root JSON var
+    juce::var currentVar = tooltipData;
+
+    // Iterate over the keys to traverse the JSON hierarchy
+    for (const auto& key : keys)
+    {
+        if (auto* dynamicObject = currentVar.getDynamicObject())
+        {
+            // Check if the key exists
+            if (dynamicObject->hasProperty (key))
+            {
+                // Move to the next nested var
+                currentVar = dynamicObject->getProperty (key);
+            }
+            else
+            {
+                // Key not found, return an empty string or handle the error
+                DBG ("Tooltip key not found: " + key);
+                jassertfalse;
+                return {};
+            }
+        }
+        else
+        {
+            // Current var is not an object, cannot proceed further
+            DBG ("Expected an object at tooltip key: " + key);
+            jassertfalse;
+            return {};
+        }
+    }
+
+    // After traversing, currentVar should be the desired value
+    if (currentVar.isString())
+    {
+        return currentVar.toString();
+    }
+    else
+    {
+        // The value is not a string, handle accordingly
+        DBG ("Value at the tooltip key path is not a string");
+        jassertfalse;
+        return {};
+    }
+}
+

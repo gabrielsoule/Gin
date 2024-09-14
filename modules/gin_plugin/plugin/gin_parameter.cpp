@@ -2,7 +2,7 @@
 Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce::String shortName_,
                       juce::String label_, float minValue, float maxValue,
                       float intervalValue, float defaultValue_, float skewFactor,
-                      std::function<juce::String (const Parameter&, float)> textFunction_)
+                      std::function<juce::String (const Parameter&, float)> textFunction_, juce::String tooltip_)
   : juce::AudioPluginInstance::HostedParameter (p.versionHint),
     processor (p),
     value (defaultValue_),
@@ -11,7 +11,8 @@ Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce:
     name (name_),
     shortName (shortName_),
     label (label_),
-    textFunction (textFunction_)
+    textFunction (textFunction_),
+    tooltip("")
 {
     if (shortName.isEmpty())
         shortName = name;
@@ -21,7 +22,7 @@ Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce:
 
 Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce::String shortName_,
                       juce::String label_, juce::NormalisableRange<float> range_, float defaultValue_,
-                      std::function<juce::String (const Parameter&, float)> textFunction_)
+                      std::function<juce::String (const Parameter&, float)> textFunction_, juce::String tooltip_)
   : juce::AudioPluginInstance::HostedParameter (p.versionHint),
     processor (p),
     range (range_),

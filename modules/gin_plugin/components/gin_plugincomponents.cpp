@@ -116,6 +116,11 @@ Select::Select (Parameter* p)
 
     name.setText (parameter->getShortName(), juce::dontSendNotification);
     name.setJustificationType (juce::Justification::centred);
+
+    if(p->getTooltip().isNotEmpty())
+    {
+        comboBox.setTooltip(p->getTooltip());
+    }
 }
 
 void Select::resized()

@@ -31,11 +31,11 @@ public:
     Parameter (Processor&, juce::String uid, juce::String name, juce::String shortName, juce::String label,
                float minValue, float maxValue,
                float intervalValue, float defaultValue, float skewFactor = 1.0f,
-               std::function<juce::String (const Parameter&, float)> textFunction = nullptr);
+               std::function<juce::String (const Parameter&, float)> textFunction = nullptr, juce::String tooltip = "");
 
     Parameter (Processor&, juce::String uid, juce::String name, juce::String shortName, juce::String label,
                juce::NormalisableRange<float> range, float defaultValue,
-               std::function<juce::String (const Parameter&, float)> textFunction = nullptr);
+               std::function<juce::String (const Parameter&, float)> textFunction = nullptr, juce::String tooltip = "");
 
     juce::String getUid() const         { return uid;       }
     void setInternal (bool i)           { internal = i;     }

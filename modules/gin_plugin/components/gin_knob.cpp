@@ -11,6 +11,11 @@ Knob::Knob (Parameter* p, bool fromCentre)
     addAndMakeVisible (knob);
     addChildComponent (modDepthSlider);
 
+    if(p->getTooltip().isNotEmpty())
+    {
+        getSlider().setTooltip(p->getTooltip());
+    }
+
     modDepthSlider.setRange (-1.0, 1.0, 0.0);
     modDepthSlider.setPopupDisplayEnabled (true, true, findParentComponentOfClass<juce::AudioProcessorEditor>());
     modDepthSlider.setDoubleClickReturnValue (true, 0.0);

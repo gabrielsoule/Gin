@@ -95,6 +95,19 @@ public:
     
 };
 
+class TooltipManager
+{
+public:
+    TooltipManager() = default;
+    void loadFromJsonString (const juce::String json);
+    void loadFromJson(juce::var json);
+    [[nodiscard]] juce::String getTooltip(const juce::String path) const;
+
+private:
+    juce::var tooltipData = juce::var::undefined();
+};
+
+
 //==============================================================================
 /** A process with internal and external params
 */
@@ -137,11 +150,13 @@ public:
     gin::Parameter* addExtParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                  juce::NormalisableRange<float> range, float defaultValue,
                                  SmoothingType st,
+                                 juce::String tooltipPath = "",
                                  std::function<juce::String (const gin::Parameter&, float)> textFunction = nullptr);
 
     gin::Parameter* addIntParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                  juce::NormalisableRange<float> range, float defaultValue,
                                  SmoothingType st,
+                                 juce::String tooltipPath = "",
                                  std::function<juce::String (const gin::Parameter&, float)> textFunction = nullptr);
 
     gin::Parameter* getParameter (const juce::String& uid);
@@ -177,6 +192,8 @@ public:
     void saveProgram (juce::String name, juce::String author, juce::String tags);
     void deleteProgram (int index);
     bool hasProgram (juce::String name);
+    [[nodiscard]] juce::String getTooltip(const juce::String& path) const {return tooltips.getTooltip(path); }
+    TooltipManager& getTooltipManager() { return tooltips; }
 
     //==============================================================================
     juce::String getStateXml();
@@ -192,7 +209,7 @@ public:
 
 public:
     std::unique_ptr<juce::LookAndFeel> lf;
-
+    TooltipManager tooltips;
     std::map<juce::String, gin::Parameter*> parameterMap;
     juce::OwnedArray<gin::Parameter> internalParameters;
 
@@ -220,6 +237,7 @@ private:
     std::unique_ptr<gin::Parameter> createParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                                  juce::NormalisableRange<float> range, float defaultValue,
                                                  SmoothingType st,
+                                                 juce::String tooltipPath = "",
                                                  std::function<juce::String (const gin::Parameter&, float)> textFunction = nullptr);
 
     juce::Array<gin::Parameter*> allParameters;
