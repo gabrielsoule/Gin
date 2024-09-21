@@ -91,20 +91,36 @@ void AnalogADSR::calculateAttack()
 
 void AnalogADSR::calculateDecay()
 {
-    float samples = float (sampleRate * decay);
-    float tco = std::exp (-5.0f);
+    if (decay <= 0.0f)
+    {
+        decayCoeff = 0.0f;
+        decayOffset = sustain;
+    }
+    else
+    {
+        float samples = sampleRate * decay;
+        float tco = std::exp(-5.0f);
 
-    decayCoeff = std::exp (-std::log ((1.0f + tco) / tco) / samples);
-    decayOffset = (sustain - tco) * (1.0f - decayCoeff);
+        decayCoeff = std::exp(-std::log((1.0f + tco) / tco) / samples);
+        decayOffset = (sustain - tco) * (1.0f - decayCoeff);
+    }
 }
 
 void AnalogADSR::calculateRelease()
 {
-    float samples = float (sampleRate * release);
-    float tco = std::exp (-5.0f);
+    if (release <= 0.0f)
+    {
+        releaseCoeff = 0.0f;
+        releaseOffset = 0.0f;
+    }
+    else
+    {
+        float samples = sampleRate * release;
+        float tco = std::exp(-5.0f);
 
-    releaseCoeff = std::exp (-std::log ((1.0f + tco) / tco) / samples);
-    releaseOffset = -tco * (1.0f - releaseCoeff);
+        releaseCoeff = std::exp(-std::log((1.0f + tco) / tco) / samples);
+        releaseOffset = -tco * (1.0f - releaseCoeff);
+    }
 }
 
 void AnalogADSR::process (juce::AudioSampleBuffer& buffer)
