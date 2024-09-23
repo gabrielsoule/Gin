@@ -36,7 +36,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
     value.setTitle (parameter->getName (100));
     value.setJustificationType (juce::Justification::centred);
-
+    value.setFont(value.getFont().withPointHeight(14));
     value.setVisible (false);
 
     addMouseListener (this, true);
