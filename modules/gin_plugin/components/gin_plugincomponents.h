@@ -61,6 +61,7 @@ public:
     {
         setButtonText (parameter->getUserValueText());
         setToggleState (parameter->getUserValue() > 0.0f, juce::dontSendNotification);
+        if(parameter->getTooltip().isNotEmpty()) setTooltip(parameter->getTooltip());
 
         parameter->addListener (this);
     }
@@ -70,6 +71,7 @@ public:
     {
         setButtonText (parameter->getUserValueText());
         setToggleState (parameter->getUserValue() > 0.0f, juce::dontSendNotification);
+        if(parameter->getTooltip().isNotEmpty()) setTooltip(parameter->getTooltip());
 
         parameter->addListener (this);
     }
