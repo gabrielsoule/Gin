@@ -705,7 +705,7 @@ void ProcessorEditor::resized()
 {
     ProcessorEditorBase::resized();
 
-    auto rc = getLocalBounds ().reduced (1);
+    auto rc = getLocalBounds ().reduced (0);
 
     titleBar.setBounds (rc.removeFromTop (headerHeight - 1));
 
