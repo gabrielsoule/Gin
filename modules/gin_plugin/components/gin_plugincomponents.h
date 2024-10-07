@@ -86,6 +86,7 @@ public:
         setToggleState (parameter->getUserValue() > 0.0f, juce::dontSendNotification);
         setButtonText (parameter->getUserValueText());
         repaint ();
+        if(valueUpdateFunction) valueUpdateFunction();
     }
 
     void clicked() override
@@ -107,6 +108,7 @@ public:
     }
 
     Parameter* parameter;
+    std::function<void()> valueUpdateFunction;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SVGPluginButton)
 };
