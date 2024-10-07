@@ -90,10 +90,13 @@ public:
 
     void clicked() override
     {
-        parameter->beginUserAction();
-        parameter->setUserValueNotifingHost (parameter->getUserValue() > 0.0f ? 0.0f : 1.0f);
-        parameter->endUserAction();
-        setButtonText (parameter->getUserValueText());
+        if(! onClick) //by default, we toggle the parameter unless we want some special behavior via onClick...
+        {
+            parameter->beginUserAction();
+            parameter->setUserValueNotifingHost (parameter->getUserValue() > 0.0f ? 0.0f : 1.0f);
+            parameter->endUserAction();
+            setButtonText (parameter->getUserValueText());
+        }
     }
 
     void parentHierarchyChanged() override
