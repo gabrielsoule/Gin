@@ -403,6 +403,11 @@ public:
         resized();
     }
 
+    void setDisplayName(const juce::String& s)
+    {
+        name.setText(s, juce::dontSendNotification);
+    }
+
 protected:
     void resized() override;
     void parentHierarchyChanged() override
