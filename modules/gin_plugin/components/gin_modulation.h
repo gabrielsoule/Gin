@@ -56,11 +56,23 @@ public:
 private:
     void update()
     {
-        if (source.isValid())
-            setTooltip ("Mod Source: " + modMatrix.getModSrcName (source));
-        else
-            setTooltip ({});
+        // if (source.isValid())
+        //     setTooltip ("Mod Source: " + modMatrix.getModSrcName (source));
+        // else
+        //     setTooltip ({});
 
+        juce::String tooltipString;
+        if(poly)
+        {
+            tooltipString = "Drag this icon to a control to establish a polyphonic modulation connection. "
+                            "Click this icon to toggle modulation edit mode, in which modulation depth can be directly edited by manipulating the destination control.";
+        } else
+        {
+            tooltipString = "Drag this icon to a control to establish a monophonic modulation connection. "
+                            "Click this icon to toggle modulation edit mode, in which modulation depth can be directly edited by manipulating the destination control.";
+        }
+
+        setTooltip(tooltipString + "\n\n" + "Modulation Source: " + modMatrix.getModSrcName(source));
         learnSourceChanged (modMatrix.getLearn());
     }
 
