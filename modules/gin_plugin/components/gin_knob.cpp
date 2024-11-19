@@ -329,13 +329,33 @@ void Knob::mouseDown (const juce::MouseEvent& e)
     if (! isEnabled())
         return;
 
-    bool shift = juce::ModifierKeys::getCurrentModifiersRealtime().isShiftDown();
-    if (shift || ! learning || ! knob.getBounds().contains (e.getMouseDownPosition()))
-        return;
-
     auto& mm = *parameter->getModMatrix();
     auto dst = ModDstId (parameter->getModIndex());
     modDepth = mm.getModDepth (mm.getLearn(), dst);
+
+#ifdef JUCE_DEBUG
+    //dump all modulation info about this knob to debug
+    juce::Array sources = mm.getModSources(parameter);
+    if(! sources.isEmpty())
+    {
+        DBG("Knob " + parameter->getName(100) + " has modulation sources:");
+        for(auto src : sources)
+        {
+            DBG("  " + mm.getModSrcName(src));
+            DBG("    Depth: " + juce::String(mm.getModDepth(src, dst)));
+            DBG("    Function: " + juce::String(mm.getModFunction(src, dst)));
+            DBG("    Enabled: " + juce::String((int) mm.getModEnable(src, dst)));
+            DBG("    Bipolar: " + juce::String((int) mm.getModBipolarMapping(src, dst)));
+        }
+    } else
+    {
+        DBG("Knob " + parameter->getName(100) + " has no modulation sources.");
+    }
+#endif
+
+    bool shift = juce::ModifierKeys::getCurrentModifiersRealtime().isShiftDown();
+    if (shift || ! learning || ! knob.getBounds().contains (e.getMouseDownPosition()))
+        return;
 
     knob.getProperties().set ("modDepth", modDepth);
 

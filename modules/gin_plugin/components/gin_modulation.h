@@ -443,7 +443,7 @@ private:
             depth.getProperties().set ("fullRect", true);
             depth.addListener (this);
             depth.setSliderSnapsToMousePosition (false);
-            depth.setMouseDragSensitivity (1250);
+            depth.setMouseDragSensitivity (750);
             depth.setPopupDisplayEnabled (true, true, findParentComponentOfClass<juce::AudioProcessorEditor>());
             depth.setDoubleClickReturnValue (true, 0.0);
             depth.onValueChange = [this]
@@ -636,6 +636,9 @@ private:
 
         juce::Label src;
         juce::Label dst;
+
+        juce::Label minValueLabel;
+        juce::Label maxValueLabel;
 
         ModCurveButton curveButton;
         SVGButton biPolarButton { "bi", Assets::bipolar };

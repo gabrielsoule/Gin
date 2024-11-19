@@ -382,6 +382,51 @@ void ModMatrix::setModDepth (ModSrcId src, ModDstId param, float f)
     pi.sources.add (s);
 
     listeners.call ([&] (Listener& l) { l.modMatrixChanged(); });
+
+    // Calculate modulation range
+    float baseValue = pi.parameter->getValue(); // Current normalized value
+    float minMod, maxMod = 0.0f;
+
+    bool bipolarSource = sources[src.id].bipolar;
+
+    // If source is bipolar (-1 to 1) or unipolar (0 to 1)
+    if (bipolarSource && s.biPolarMapping) {
+        // Full bipolar swing
+        minMod = baseValue + (-1.0f * f);
+        maxMod = baseValue + (1.0f * f);
+    } else if (!bipolarSource && !s.biPolarMapping) {
+        // Unipolar positive only
+        minMod = baseValue;
+        maxMod = baseValue + (1.0f * f);
+    } else if (bipolarSource && !s.biPolarMapping) {
+        // Bipolar source mapped to unipolar
+        minMod = baseValue;
+        maxMod = baseValue + (1.0f * f);
+    } else { // !bipolarSource && s.biPolarMapping
+        // Unipolar source mapped to bipolar
+        minMod = baseValue + (-1.0f * f);
+        maxMod = baseValue + (1.0f * f);
+    }
+
+    float minModClamped = juce::jlimit(0.0f, 1.0f, minMod);
+    float maxModClamped = juce::jlimit(0.0f, 1.0f, maxMod);
+
+    float minValue = pi.parameter->getUserRange().convertFrom0to1(minMod);
+    float maxValue = pi.parameter->getUserRange().convertFrom0to1(maxMod);
+
+    float minValueClamped = pi.parameter->getUserRange().convertFrom0to1(minModClamped);
+    float maxValueClamped = pi.parameter->getUserRange().convertFrom0to1(maxModClamped);
+
+    DBG("Modulation connection built:");
+    DBG("  Source         : " + sources[src.id].name);
+    DBG("  Destination    : " + pi.parameter->getName (1024));
+    DBG("  Depth          : " + juce::String (f));
+    DBG("  Bipolar        : " + juce::String ((int) s.biPolarMapping));
+    DBG("  Base value     : " + juce::String(pi.parameter->getUserRange().convertFrom0to1(baseValue)));
+    DBG("  Param Range    : " + juce::String(pi.parameter->getUserRangeStart()) + " to " + juce::String(pi.parameter->getUserRangeEnd()));
+    DBG("  Depth Clamped  : " + juce::String(minValueClamped) + " to " + juce::String(maxValueClamped));
+    DBG("  Depth Internal : " + juce::String(minValue) + " to " + juce::String(maxValue));
+
 }
 
 void ModMatrix::setModFunction (ModSrcId src, ModDstId param, Function f)
