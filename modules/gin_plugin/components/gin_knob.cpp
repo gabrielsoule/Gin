@@ -134,8 +134,30 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
                 auto pname      = mm->getModSrcName (d.first);
                 auto val        = parameter->getText (std::clamp (float (parameter->getValue() + v), 0.0f, 1.0f), 1000);
+                auto isBipolar = mm->getModBipolarMapping(d.first, ModDstId(parameter->getModIndex()));
+                float minValue;
+                float maxValue;
+                if (isBipolar)
+                {
+                    // For bipolar, depth of 1.0 means ±100%
+                    minValue = std::clamp(parameter->getValue() - static_cast<float>(v), 0.0f, 1.0f);
+                    maxValue = std::clamp(parameter->getValue() + static_cast<float>(v), 0.0f, 1.0f);
+                }
+                else
+                {
+                    // For unipolar, depth of 1.0 means +100%
+                    minValue = parameter->getValue();
+                    maxValue = std::clamp(parameter->getValue() + static_cast<float>(v), 0.0f, 1.0f);
+                }
+                auto minText = parameter->getText(minValue, 1000) + " " + parameter->getLabel();
+                auto maxText = parameter->getText(maxValue, 1000) + " " + parameter->getLabel();
 
-                return pname + ": " + val + " " + parameter->getLabel();
+                // Calculate depth percentage
+                auto depthPercentage = v * (isBipolar ? 100.0f : 100.0f);
+                juce::String tooltip;
+                tooltip  << (v >= 0 ? "+" : "")
+                      << juce::String(depthPercentage, 1) << "% " << "(" << minText << " - " << maxText << ")";
+                return tooltip;
             }
         }
         return juce::String();

@@ -481,14 +481,43 @@ private:
                     depth.setValue (d, juce::dontSendNotification);
                 }
             };
-            depth.onTextFromValue = [this] (double v)
+            depth.onTextFromValue = [this](double depthValue) -> juce::String
             {
-                auto& a = owner.assignments.getReference (row);
+                auto& a = owner.assignments.getReference(row);
                 auto parameter = a.dst;
+                auto isBipolar = owner.modMatrix.getModBipolarMapping(a.src, ModDstId(parameter->getModIndex()));
 
-                auto val = parameter->getText (std::clamp (float (parameter->getValue() + v), 0.0f, 1.0f), 1000);
+                auto currentValue = parameter->getValue();
+                auto range = parameter->getUserRange();
 
-                return val + " " + parameter->getLabel();
+                // Calculate min/max values in parameter range
+                float minValue, maxValue;
+                if (isBipolar)
+                {
+                    // For bipolar, depth of 1.0 means ±100%
+                    minValue = std::clamp(currentValue - static_cast<float>(depthValue), 0.0f, 1.0f);
+                    maxValue = std::clamp(currentValue + static_cast<float>(depthValue), 0.0f, 1.0f);
+                }
+                else
+                {
+                    // For unipolar, depth of 1.0 means +100%
+                    minValue = currentValue;
+                    maxValue = std::clamp(currentValue + static_cast<float>(depthValue), 0.0f, 1.0f);
+                }
+
+                // Convert normalized values to user range
+                auto minText = parameter->getText(minValue, 1000) + " " + parameter->getLabel();
+                auto maxText = parameter->getText(maxValue, 1000) + " " + parameter->getLabel();
+
+                // Calculate depth percentage
+                auto depthPercentage = depthValue * (isBipolar ? 100.0f : 100.0f);
+
+                // Format the tooltip string
+                juce::String tooltip;
+                tooltip << (depthValue >= 0 ? "+" : "")
+                       << juce::String(depthPercentage, 1) << "% " << "(" << minText << " - " << maxText << ")";
+
+                return tooltip;
             };
 
             enableButton.onClick = [this]
