@@ -155,7 +155,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
                 // Calculate depth percentage
                 auto depthPercentage = v * (isBipolar ? 100.0f : 100.0f);
                 juce::String tooltip;
-                tooltip  << (v >= 0 ? "+" : "")
+                tooltip << pname << " " << (v >= 0 ? "+" : "")
                       << juce::String(depthPercentage, 1) << "% " << "(" << minText << " - " << maxText << ")";
                 return tooltip;
             }
