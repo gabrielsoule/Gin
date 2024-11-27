@@ -6,6 +6,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
     knob (parameter, juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox),
     internalKnobReduction(3)
 {
+    jassert(parameter != nullptr);
     addAndMakeVisible (name);
     addAndMakeVisible (value);
     addAndMakeVisible (knob);
@@ -50,6 +51,12 @@ Knob::Knob (Parameter* p, bool fromCentre)
     modTimer.onTimer = [this] ()
     {
         auto& mm = *parameter->getModMatrix();
+        if (parameter->getModMatrix() == nullptr)
+        {
+            DBG("Parameter is null for knob " + getName());
+            jassertfalse;
+            return;
+        }
         if (mm.shouldShowLiveModValues())
         {
             auto curModValues = liveValuesCallback ? liveValuesCallback() : mm.getLiveValues (parameter, 0);
@@ -172,6 +179,9 @@ Knob::~Knob()
         auto& mm = *parameter->getModMatrix();
         mm.removeListener (this);
     }
+    //sometimes, the timers are not terminated when the plugin is deleted by some DAWs, so let's do it by hand here
+    modTimer.stopTimer();
+    shiftTimer.stopTimer();
 }
 
 void Knob::setDisplayName (const juce::String& n)
