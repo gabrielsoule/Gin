@@ -182,6 +182,7 @@ Knob::~Knob()
     //sometimes, the timers are not terminated when the plugin is deleted by some DAWs, so let's do it by hand here
     modTimer.stopTimer();
     shiftTimer.stopTimer();
+    stopTimer();
 }
 
 void Knob::setDisplayName (const juce::String& n)
@@ -365,7 +366,7 @@ void Knob::mouseDown (const juce::MouseEvent& e)
     auto dst = ModDstId (parameter->getModIndex());
     modDepth = mm.getModDepth (mm.getLearn(), dst);
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     //dump all modulation info about this knob to debug
     juce::Array sources = mm.getModSources(parameter);
     if(! sources.isEmpty())
