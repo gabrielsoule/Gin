@@ -516,7 +516,7 @@ private:
         bool bipolar = false;
         bool stereo = false;
         ModSrcId index = {};
-        float monoValues[2];
+        float monoValues[2] = {0, 0};
     };
 
     struct Source

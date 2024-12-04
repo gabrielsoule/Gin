@@ -27,7 +27,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
     if (fromCentre)
         knob.getProperties().set ("fromCentre", true);
 
-    knob.setName (parameter->getShortName());
+    knob.setName (parameter->getName(50));
 
     name.setText (parameter->getShortName(), juce::dontSendNotification);
     name.setJustificationType (juce::Justification::centred);
@@ -51,6 +51,12 @@ Knob::Knob (Parameter* p, bool fromCentre)
     modTimer.onTimer = [this] ()
     {
         auto& mm = *parameter->getModMatrix();
+        if (parameter == nullptr || parameter->getModMatrix() == nullptr)
+        {
+            DBG("Parameter is null for knob " + getName());
+            // jassertfalse;
+            return;
+        }
         if (parameter->getModMatrix() == nullptr)
         {
             DBG("Parameter is null for knob " + getName());
@@ -174,15 +180,15 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
 Knob::~Knob()
 {
+    //sometimes, the timers are not terminated when the plugin is deleted by some DAWs, so let's do it by hand here
+    modTimer.stopTimer();
+    shiftTimer.stopTimer();
+    stopTimer();
     if (parameter->getModIndex() >= 0)
     {
         auto& mm = *parameter->getModMatrix();
         mm.removeListener (this);
     }
-    //sometimes, the timers are not terminated when the plugin is deleted by some DAWs, so let's do it by hand here
-    modTimer.stopTimer();
-    shiftTimer.stopTimer();
-    stopTimer();
 }
 
 void Knob::setDisplayName (const juce::String& n)
