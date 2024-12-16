@@ -411,12 +411,6 @@ void ModMatrix::setModDepth (ModSrcId src, ModDstId param, float f)
     float minModClamped = juce::jlimit(0.0f, 1.0f, minMod);
     float maxModClamped = juce::jlimit(0.0f, 1.0f, maxMod);
 
-    float minValue = pi.parameter->getUserRange().convertFrom0to1(minMod);
-    float maxValue = pi.parameter->getUserRange().convertFrom0to1(maxMod);
-
-    float minValueClamped = pi.parameter->getUserRange().convertFrom0to1(minModClamped);
-    float maxValueClamped = pi.parameter->getUserRange().convertFrom0to1(maxModClamped);
-
     DBG("Modulation connection built:");
     DBG("  Source         : " + sources[src.id].name);
     DBG("  Destination    : " + pi.parameter->getName (1024));

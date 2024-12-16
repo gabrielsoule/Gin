@@ -19,7 +19,11 @@ public:
         : name (name_)
     {
         setName (name);
-        font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0).withKerningFactor (0.08).withStyle("Medium"));
+        font = juce::Font (juce::FontOptions()
+            .withName("Jost*")
+            .withPointHeight (14.0f)
+            .withKerningFactor (0.08f)
+            .withStyle("Medium"));
 
     }
 
@@ -46,7 +50,6 @@ private:
     }
 
     juce::String name;
-    int nameWidth;
     juce::Font font;
 };
 
@@ -61,8 +64,8 @@ public:
     HeaderButton (const juce::String& name_)
         : juce::Button (name_)
     {
-        stringLength = std::round(juce::Font (juce::FontOptions().withName("Futura").withPointHeight (13.0).withKerningFactor (0.08)).getStringWidthFloat(name_));
-        font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0).withKerningFactor (0.08).withStyle("Medium"));
+        stringLength = std::round(juce::Font (juce::FontOptions().withName("Futura").withPointHeight (13.0f).withKerningFactor (0.08f)).getStringWidthFloat(name_));
+        font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0f).withKerningFactor (0.08f).withStyle("Medium"));
     }
     
     bool isInterestedInDragSource (const SourceDetails&) override
@@ -96,7 +99,7 @@ private:
         g.setFont(font);
         if(getToggleState())
         {
-            g.setColour(findColour (PluginLookAndFeel::accentColourId).brighter(0.1));
+            g.setColour(findColour (PluginLookAndFeel::accentColourId).brighter(0.1f));
         }
         else
         {

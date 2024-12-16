@@ -11,8 +11,8 @@ Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce:
     name (name_),
     shortName (shortName_),
     label (label_),
-    textFunction (textFunction_),
-    tooltip("")
+    tooltip(tooltip_),
+    textFunction (textFunction_)
 {
     if (shortName.isEmpty())
         shortName = name;
@@ -32,6 +32,7 @@ Parameter::Parameter (Processor& p, juce::String uid_, juce::String name_, juce:
     name (name_),
     shortName (shortName_),
     label (label_),
+    tooltip(tooltip_),
     textFunction (textFunction_)
 {
     if (shortName.isEmpty())

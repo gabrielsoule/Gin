@@ -2,9 +2,9 @@
 //==============================================================================
 Knob::Knob (Parameter* p, bool fromCentre)
   : ParamComponent (p),
+    internalKnobReduction(3),
     value (parameter),
-    knob (parameter, juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox),
-    internalKnobReduction(3)
+    knob (parameter, juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::NoTextBox)
 {
     jassert(parameter != nullptr);
     addAndMakeVisible (name);
