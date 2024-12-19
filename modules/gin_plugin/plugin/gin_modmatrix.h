@@ -76,8 +76,8 @@ private:
     friend ModMatrix;
 
     ModMatrix* owner = nullptr;
-    juce::Array<std::array<float, 2>> values;
-    juce::Array<std::array<ValueSmoother<float>, 2>> smoothers;
+    std::vector<std::array<float, 2>> values;
+    std::vector<std::array<ValueSmoother<float>, 2>> smoothers;
     int age = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ModVoice)
@@ -218,7 +218,7 @@ public:
         const int paramId = p->getModIndex();
 
         float base = p->getValue();
-        auto& info = parameters.getReference (paramId);
+        auto& info = parameters[paramId];
 
         for (auto& src : info.sources)
         {
@@ -232,7 +232,7 @@ public:
         }
 
         base = juce::jlimit (0.0f, 1.0f, base);
-        auto& smoother = smoothers.getReference (paramId)[channel];
+        auto& smoother = smoothers[paramId][channel];
 
         smoother.setValue (base);
         auto v = smoothed ? smoother.getCurrentValue() : base;
@@ -258,7 +258,7 @@ public:
         jassert (paramId >= 0);
 
         float base = p->getValue();
-        auto& info = parameters.getReference (paramId);
+        auto& info = parameters[paramId];
 
         for (auto& src : info.sources)
         {
@@ -272,7 +272,7 @@ public:
         }
 
         base = juce::jlimit (0.0f, 1.0f, base);
-        auto& smoother = voice.smoothers.getReference (paramId)[channel];
+        auto& smoother = voice.smoothers[paramId][channel];
 
         smoother.setValue (base);
         auto v = (voice.disableSmoothing || ! smoothed) ? base : smoother.getCurrentValue();
@@ -296,9 +296,9 @@ public:
         juce::Array<float> liveValues;
 
         const int paramId = p->getModIndex();
-        auto& pi = parameters.getReference (paramId);
+        auto& pi = parameters[paramId];
 
-        auto& info = parameters.getReference (paramId);
+        auto& info = parameters[paramId];
 
         if (pi.poly)
         {
@@ -393,7 +393,7 @@ public:
     void setMonoValue (ModSrcId id, float value, int channel)
     {
         jassert(channel == 0 || channel == 1);
-        auto& info = sources.getReference (id.id);
+        auto& info = sources[id.id];
         jassert (! info.poly);
 
         info.monoValues[channel] = value;
@@ -406,8 +406,8 @@ public:
 
     void setPolyValue(ModVoice& voice, ModSrcId id, float value, int channel)
     {
-        jassert (sources.getReference (id.id).poly);
-        voice.values.getReference(id.id)[channel] = value;
+        jassert (sources[id.id].poly);
+        voice.values[id.id][channel] = value;
     }
 
     void setPolyValue (ModVoice& voice, ModSrcId id, float value)
@@ -423,6 +423,15 @@ public:
             s[1].process(numSamples);
         }
 
+    }
+
+    void snapParams()
+    {
+        for (auto& s : smoothers)
+        {
+            s[0].snapToValue();
+            s[1].snapToValue();
+        }
     }
 
     //==============================================================================
@@ -535,14 +544,15 @@ private:
         gin::Parameter* parameter = nullptr;
         bool poly = false;
         float smoothingTime = 0.02f;
-        juce::Array<Source> sources;
+        std::vector<Source> sources;
     };
 
     //==============================================================================
-    juce::Array<SourceInfo> sources;
-    juce::Array<ParamInfo> parameters;
-    juce::Array<ModVoice*> voices;
-    juce::Array<std::array<ValueSmoother<float>, 2>> smoothers;
+    std::vector<SourceInfo> sources;
+    std::vector<ParamInfo> parameters;
+    std::vector<ModVoice*> voices;
+    std::vector<std::array<ValueSmoother<float>, 2>> smoothers;
+    // juce::Array<ValueSmoother<float>> smoothers[2];
     ModVoice* activeVoice = nullptr;
     bool onlyShowModWhenVoiceActive = false;
     PolarityMode defaultPolarityMode = sameAsSource;

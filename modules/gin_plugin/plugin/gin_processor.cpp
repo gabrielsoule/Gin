@@ -34,7 +34,7 @@ ProcessorOptions::ProcessorOptions()
 
 //==============================================================================
 Processor::Processor (bool init_, ProcessorOptions po)
-    : processorOptions (po)
+    : processorOptions (po), tooltips(juce::var::undefined())
 {
     lf = std::make_unique<gin::CopperLookAndFeel>();
 
@@ -43,7 +43,25 @@ Processor::Processor (bool init_, ProcessorOptions po)
 }
 
 Processor::Processor (const BusesProperties& ioLayouts, bool init_, ProcessorOptions po)
-    : ProcessorBaseClass (ioLayouts), processorOptions (po)
+    : ProcessorBaseClass (ioLayouts), processorOptions (po), tooltips(juce::var::undefined())
+{
+    lf = std::make_unique<gin::CopperLookAndFeel>();
+
+    if (init_)
+        init();
+}
+
+Processor::Processor (const BusesProperties& ioLayouts, bool init_, ProcessorOptions po, juce::var tooltipsJson)
+    : ProcessorBaseClass (ioLayouts), processorOptions (po), tooltips(tooltipsJson)
+{
+    lf = std::make_unique<gin::CopperLookAndFeel>();
+
+    if (init_)
+        init();
+}
+
+Processor::Processor (bool init_, ProcessorOptions po, juce::var tooltipsJson)
+    : processorOptions (po), tooltips(tooltipsJson)
 {
     lf = std::make_unique<gin::CopperLookAndFeel>();
 
@@ -629,16 +647,10 @@ void Processor::setStateXml (const juce::String& text)
     lastStateLoad = juce::Time::getCurrentTime();
 }
 
-void TooltipManager::loadFromJsonString(const juce::String json)
+TooltipManager::TooltipManager(const juce::var json) : tooltipData(json)
 {
-    tooltipData = juce::JSON::parse(json);
-}
 
-void TooltipManager::loadFromJson(juce::var json)
-{
-    tooltipData = json;
 }
-
 
 juce::String TooltipManager::getTooltip(const juce::String path) const
 {

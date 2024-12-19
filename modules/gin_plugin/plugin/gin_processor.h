@@ -98,9 +98,8 @@ public:
 class TooltipManager
 {
 public:
-    TooltipManager() = default;
-    void loadFromJsonString (const juce::String json);
-    void loadFromJson(juce::var json);
+    // TooltipManager() = default;
+    TooltipManager(const juce::var json);
     [[nodiscard]] juce::String getTooltip(const juce::String path) const;
 
 private:
@@ -128,6 +127,8 @@ public:
      */
     Processor (bool init = true, ProcessorOptions = {});
     Processor (const BusesProperties& ioLayouts, bool init = true, ProcessorOptions = {});
+    Processor(const BusesProperties& ioLayouts, bool init_, ProcessorOptions po, juce::var tooltipsJson);
+    Processor(bool init_, ProcessorOptions po, juce::var tooltipsJson);
     ~Processor() override;
 
     void init();

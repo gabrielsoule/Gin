@@ -121,7 +121,7 @@ void ModMatrix::stateUpdated (const juce::ValueTree& vt)
                 {
                     if (pi.parameter->getUid() == dst)
                     {
-                        pi.sources.add (s);
+                        pi.sources.push_back(s);
                         foundParam = true;
                         break;
                     }
@@ -145,7 +145,7 @@ void ModMatrix::updateState (juce::ValueTree& vt)
 
     for (int i = 0; i < parameters.size(); i++)
     {
-        auto& pi = parameters.getReference (i);
+        auto& pi = parameters[i];
         for (auto src : pi.sources)
         {
             auto c = juce::ValueTree ("MODITEM");
@@ -163,7 +163,7 @@ void ModMatrix::updateState (juce::ValueTree& vt)
 
 void ModMatrix::addVoice (ModVoice* v)
 {
-    voices.add (v);
+    voices.push_back (v);
 
     v->owner = this;
 }
@@ -177,7 +177,7 @@ ModSrcId ModMatrix::addMonoModSource (const juce::String& id, const juce::String
     si.bipolar = bipolar;
     si.index   = ModSrcId (sources.size());
 
-    sources.add (si);
+    sources.push_back (si);
     return ModSrcId (si.index);
 }
 
@@ -190,7 +190,7 @@ ModSrcId ModMatrix::addPolyModSource (const juce::String& id, const juce::String
     si.bipolar = bipolar;
     si.index   = ModSrcId (sources.size());
 
-    sources.add (si);
+    sources.push_back (si);
     return ModSrcId (si.index);
 }
 
@@ -204,7 +204,7 @@ void ModMatrix::addParameter (Parameter* p, bool poly, float smoothingTime)
     pi.parameter = p;
     pi.smoothingTime = smoothingTime;
 
-    parameters.add (pi);
+    parameters.push_back (pi);
 }
 
 void ModMatrix::setSampleRate (double sr)
@@ -235,13 +235,32 @@ void ModMatrix::setSampleRate (double sr)
 
 void ModMatrix::build()
 {
-    for (auto& v : voices)
+    smoothers.resize(parameters.size());
+    for (int i = 0; i < parameters.size(); ++i)
     {
-        v->values.resize (sources.size());
-        v->smoothers.resize (parameters.size());
+        auto defaultValue = parameters[i].parameter->getDefaultValue();
+        auto& stereoSmoother = smoothers[i];
+        stereoSmoother[0].setValue(defaultValue);
+        stereoSmoother[0].snapToValue();
+        stereoSmoother[1].setValue(defaultValue);
+        stereoSmoother[1].snapToValue();
     }
 
-    smoothers.resize (parameters.size());
+    for (auto& v : voices)
+    {
+        v->values.resize(sources.size());
+        v->smoothers.resize(parameters.size());
+
+        for (int i = 0; i < parameters.size(); ++i)
+        {
+            auto defaultValue = parameters[i].parameter->getDefaultValue();
+            auto& stereoSmoother = v->smoothers[i];  // Access voice smoothers, not main smoothers
+            stereoSmoother[0].setValue(defaultValue);
+            stereoSmoother[0].snapToValue();
+            stereoSmoother[1].setValue(defaultValue);
+            stereoSmoother[1].snapToValue();
+        }
+    }
 }
 
 void ModMatrix::enableLearn (ModSrcId src)
@@ -260,7 +279,7 @@ void ModMatrix::disableLearn()
 
 bool ModMatrix::isModulated (ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     if (pi.sources.size() > 0)
         return true;
     return false;
@@ -268,7 +287,7 @@ bool ModMatrix::isModulated (ModDstId param)
 
 bool ModMatrix::getModEnable (ModSrcId src, ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             return si.enabled;
@@ -278,7 +297,7 @@ bool ModMatrix::getModEnable (ModSrcId src, ModDstId param)
 
 void ModMatrix::setModEnable (ModSrcId src, ModDstId param, bool b)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             si.enabled = b;
@@ -288,7 +307,7 @@ void ModMatrix::setModEnable (ModSrcId src, ModDstId param, bool b)
 
 bool ModMatrix::getModBipolarMapping (ModSrcId src, ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             return si.biPolarMapping;
@@ -298,7 +317,7 @@ bool ModMatrix::getModBipolarMapping (ModSrcId src, ModDstId param)
 
 void ModMatrix::setModBipolarMapping (ModSrcId src, ModDstId param, bool b)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             si.biPolarMapping = b;
@@ -308,7 +327,7 @@ void ModMatrix::setModBipolarMapping (ModSrcId src, ModDstId param, bool b)
 
 float ModMatrix::getModDepth (ModSrcId src, ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             return si.depth;
@@ -318,7 +337,7 @@ float ModMatrix::getModDepth (ModSrcId src, ModDstId param)
 
 ModMatrix::Function ModMatrix::getModFunction (ModSrcId src, ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         if (si.id == src)
             return si.function;
@@ -330,7 +349,7 @@ std::vector<std::pair<ModSrcId, float>> ModMatrix::getModDepths (ModDstId param)
 {
     std::vector<std::pair<ModSrcId, float>> res;
 
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
         res.push_back ({si.id, si.depth});
 
@@ -353,7 +372,7 @@ std::vector<std::pair<ModDstId, float>> ModMatrix::getModDepths (ModSrcId param)
 
 void ModMatrix::setModDepth (ModSrcId src, ModDstId param, float f)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
     {
         if (si.id == src)
@@ -379,7 +398,7 @@ void ModMatrix::setModDepth (ModSrcId src, ModDstId param, float f)
     else if (defaultPolarityMode == sameAsSource)
         s.biPolarMapping = sources[src.id].bipolar;
 
-    pi.sources.add (s);
+    pi.sources.push_back (s);
 
     listeners.call ([&] (Listener& l) { l.modMatrixChanged(); });
 
@@ -398,7 +417,7 @@ void ModMatrix::setModDepth (ModSrcId src, ModDstId param, float f)
 
 void ModMatrix::setModFunction (ModSrcId src, ModDstId param, Function f)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (auto& si : pi.sources)
     {
         if (si.id == src)
@@ -424,19 +443,19 @@ void ModMatrix::setModFunction (ModSrcId src, ModDstId param, Function f)
     else if (defaultPolarityMode == sameAsSource)
         s.biPolarMapping = sources[src.id].bipolar;
 
-    pi.sources.add (s);
+    pi.sources.push_back(s);
 
     listeners.call ([&] (Listener& l) { l.modMatrixChanged(); });
 }
 
 void ModMatrix::clearModDepth (ModSrcId src, ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     for (int i = pi.sources.size(); --i >= 0;)
     {
         auto si = pi.sources[i];
         if (si.id == src)
-            pi.sources.remove (i);
+            pi.sources.erase(pi.sources.begin() + i);
     }
 
     listeners.call ([&] (Listener& l) { l.modMatrixChanged(); });
@@ -444,7 +463,7 @@ void ModMatrix::clearModDepth (ModSrcId src, ModDstId param)
 
 juce::String ModMatrix::getModDstName (ModDstId param)
 {
-    auto& pi = parameters.getReference (param.id);
+    auto& pi = parameters[param.id];
     return pi.parameter->getName (1024);
 }
 
@@ -455,7 +474,7 @@ juce::Array<ModSrcId> ModMatrix::getModSources (gin::Parameter* param)
     auto idx = param->getModIndex();
     if (idx >= 0)
     {
-        auto& pi = parameters.getReference (idx);
+        auto& pi = parameters[idx];
         for (auto& si : pi.sources)
             srcs.add (si.id);
     }
