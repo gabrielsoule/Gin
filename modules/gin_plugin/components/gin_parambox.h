@@ -64,8 +64,8 @@ public:
     HeaderButton (const juce::String& name_)
         : juce::Button (name_)
     {
-        stringLength = static_cast<int>(std::round(juce::Font (juce::FontOptions().withName("Futura").withPointHeight (13.0f).withKerningFactor (0.08f)).getStringWidthFloat(name_)));
         font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0f).withKerningFactor (0.08f).withStyle("Medium"));
+        stringLength = juce::GlyphArrangement::getStringWidth(font, name_);
     }
     
     bool isInterestedInDragSource (const SourceDetails&) override
