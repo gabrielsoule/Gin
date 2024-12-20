@@ -56,11 +56,6 @@ public:
 private:
     void update()
     {
-        // if (source.isValid())
-        //     setTooltip ("Mod Source: " + modMatrix.getModSrcName (source));
-        // else
-        //     setTooltip ({});
-
         juce::String tooltipString;
         if(poly)
         {
@@ -72,7 +67,14 @@ private:
                             "Click this icon to toggle modulation edit mode, in which modulation depth can be directly edited by manipulating the destination control.";
         }
 
-        setTooltip(tooltipString + "\n\n" + "Modulation Source: " + modMatrix.getModSrcName(source));
+        if (source.id >= 0)
+        {
+            setTooltip(tooltipString + "\n\n" + "Modulation Source: " + modMatrix.getModSrcName(source));
+        } else
+        {
+            setTooltip(tooltipString);
+        }
+
         learnSourceChanged (modMatrix.getLearn());
     }
 
