@@ -291,11 +291,14 @@ public:
 
     Component* refreshComponentForRow (int row, bool, Component* c) override
     {
-        auto rowComponent = (Row*)c;
-        if (rowComponent == nullptr)
-            rowComponent = new Row (modMatrix);
+        auto rowComponent = static_cast<Row*>(c);
+        if (row < getNumRows())
+        {
+            if (rowComponent == nullptr)
+                rowComponent = new Row (modMatrix);
 
-        rowComponent->update (row);
+            rowComponent->update (row);
+        }
         return rowComponent;
     }
 
