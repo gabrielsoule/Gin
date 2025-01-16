@@ -413,6 +413,7 @@ public:
     void setPolyValue (ModVoice& voice, ModSrcId id, float value)
     {
         setPolyValue(voice, id, value, 0);
+        setPolyValue(voice, id, value, 1);
     }
 
     void finishBlock (int numSamples)
