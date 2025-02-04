@@ -61,8 +61,8 @@ class HeaderButton : public juce::Button,
                      private juce::Timer
 {
 public:
-    HeaderButton (const juce::String& name_)
-        : juce::Button (name_)
+    HeaderButton (const juce::String& name_, juce::Justification j = juce::Justification::centred)
+        : juce::Button (name_), justification (j)
     {
         font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0f).withKerningFactor (0.08f).withStyle("Medium"));
         stringLength = juce::GlyphArrangement::getStringWidth(font, name_);
@@ -115,6 +115,8 @@ private:
         g.drawText (getButtonText().toUpperCase(), getLocalBounds(), juce::Justification::centred);
         if(getToggleState()) g.fillRect (juce::Rectangle<int> (getWidth() / 2 - stringLength / 2, getBottom() - 2, stringLength - 3, 2));
     }
+
+    juce::Justification justification;
 
     int stringLength;
     juce::Font font;

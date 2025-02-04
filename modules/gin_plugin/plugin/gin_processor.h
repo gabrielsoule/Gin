@@ -131,7 +131,8 @@ public:
     Processor(bool init_, ProcessorOptions po, juce::var tooltipsJson);
     ~Processor() override;
 
-    void init();
+    virtual void init();
+    virtual Program* createProgram() { return new Program(); }
 
     void reset() override;
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -172,7 +173,7 @@ public:
     virtual bool isParamLocked (gin::Parameter*) { return false; }
 
     virtual juce::File getProgramDirectory();
-    void loadAllPrograms();
+    virtual void loadAllPrograms();
 
     //==============================================================================
     const juce::String getName() const override;
@@ -227,7 +228,6 @@ protected:
     void extractProgram (const juce::String& name, const juce::MemoryBlock& data);
     void extractProgram (const juce::String& name, const void* data, int sz);
 
-private:
 #if ! JUCE_IOS && ! JUCE_ANDROID
     void folderChanged (const juce::File&) override;
 #endif

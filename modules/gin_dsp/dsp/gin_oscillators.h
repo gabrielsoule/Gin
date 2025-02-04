@@ -10,7 +10,7 @@
 #pragma once
 
 //==============================================================================
-/** Stereo oscillator. L & R can be at different pitches
+/** Virtual Analog Stereo oscillator.
 */
 class StereoOscillator
 {
@@ -23,6 +23,8 @@ public:
         float leftGain = 1.0;
         float rightGain = 1.0;
         float pw = 0.5;
+        float fold = 0.0f;
+        float asym = 0.0f;
     };
 
     void setSampleRate (double sr)  { sampleRate = sr; }
@@ -46,6 +48,8 @@ public:
         for (int i = 0; i < samps; i++)
         {
             auto s = bllt.process (params.wave, note, phase, params.pw);
+            postProcess (params, s);
+
             *l++ += s * params.leftGain;
             *r++ += s * params.rightGain;
 
@@ -56,6 +60,19 @@ public:
     }
 
 private:
+    template<typename T>
+    void postProcess (const Params& params, T& v)
+    {
+        if (params.asym > 0)
+            v = math::lerp (v, math::pow4 (v - 1.0f) * -1.0f + 1.0f, math::pow2 (params.asym));
+
+        if (params.fold > 0)
+        {
+            const auto fold = math::pow2 (math::pow2 (1.0f - params.fold)) * 1.5f;
+            v = (v - ((math::max (v, fold) - fold) * T(2.0f)) - ((math::min (v, -fold) + fold) * T(2.0f)));
+        }
+    }
+
     BandLimitedLookupTables& bllt;
     double sampleRate = 44100.0;
     float phase = 0.0f;
@@ -141,13 +158,17 @@ protected:
 
 struct VoicedStereoOscillatorParams : public VoicedOscillatorParams
 {
-    Wave wave = Wave::sawUp;
-    float pw = 0.5;
+    Wave wave   = Wave::sawUp;
+    float pw    = 0.5;
+    float fold  = 0.0f;
+    float asym  = 0.0f;
 
     inline void init (StereoOscillator::Params& p) const
     {
-        p.wave = wave;
-        p.pw = pw;
+        p.wave  = wave;
+        p.pw    = pw;
+        p.asym  = asym;
+        p.fold  = fold;
     }
 };
 
