@@ -11,7 +11,14 @@ void LFOComponent::resized()
 
 void LFOComponent::setParams (Parameter::Ptr wave_, Parameter::Ptr sync_, Parameter::Ptr rate_,
                               Parameter::Ptr beat_, Parameter::Ptr depth_, Parameter::Ptr offset_,
-                              Parameter::Ptr phase_, Parameter::Ptr enable_, Parameter::Ptr stereo_)
+                              Parameter::Ptr phase_, Parameter::Ptr enable_)
+{
+    setParams(wave_, sync_, rate_, beat_, depth_, offset_, phase_, enable_, nullptr);
+}
+
+void LFOComponent::setParams (Parameter::Ptr wave_, Parameter::Ptr sync_, Parameter::Ptr rate_,
+                              Parameter::Ptr beat_, Parameter::Ptr depth_, Parameter::Ptr offset_,
+                              Parameter::Ptr phase_, Parameter::Ptr enable_, Parameter::Ptr stereo_ = nullptr)
 {
     unwatchParams();
 
@@ -23,7 +30,7 @@ void LFOComponent::setParams (Parameter::Ptr wave_, Parameter::Ptr sync_, Parame
     watchParam (offset = offset_);
     watchParam (phase  = phase_);
     watchParam (enable = enable_);
-    watchParam (stereo = stereo_);
+    if (stereo != nullptr) watchParam (stereo = stereo_);
 
     startTimerHz (30);
 }
@@ -31,7 +38,10 @@ void LFOComponent::setParams (Parameter::Ptr wave_, Parameter::Ptr sync_, Parame
 void LFOComponent::paramChanged ()
 {
     MultiParamComponent::paramChanged();
-    phaseOffset = stereo->getProcValue();
+    if (stereo != nullptr)
+        phaseOffset = stereo->getProcValue();
+    else
+        phaseOffset = 0.0f;
     dirty = true;
 }
 
@@ -46,14 +56,17 @@ void LFOComponent::createPath (juce::Rectangle<int> area)
     pL.offset    = offset->getProcValue();
     pL.depth     = depth->getProcValue();
 
-    LFO::Parameters pR = LFO::Parameters(pL);
-    pR.phase += stereo->getProcValue();
 
     lfoL.setParameters (pL);
     lfoL.reset();
 
-    lfoR.setParameters (pR);
-    lfoR.reset();
+    if (stereo != nullptr)
+    {
+        LFO::Parameters pR = LFO::Parameters(pL);
+        pR.phase += stereo->getProcValue();
+        lfoR.setParameters (pR);
+        lfoR.reset();
+    }
 
     auto vToY = [&] (float v)
     {
@@ -113,17 +126,17 @@ void LFOComponent::paint (juce::Graphics& g)
             g.setColour(juce::Colours::palevioletred.withLightness(0.7f).withAlpha(1.0f));
             g.fillEllipse (rc.getX() + x - 2, y - 2, 4, 4);
 
-            x = std::fmod((curPhase + phaseOffset) / getNumSteps(), 1.0f) * rc.getWidth();
-            t = x - int (x);
-            y = lerp (t, curve[int(x)], curve[int(x) + 1]);
+            if (stereo != nullptr)
+            {
+                x = std::fmod((curPhase + phaseOffset) / getNumSteps(), 1.0f) * rc.getWidth();
+                t = x - int (x);
+                y = lerp (t, curve[int(x)], curve[int(x) + 1]);
 
-            g.setColour(juce::Colours::teal.withLightness(0.7f).withAlpha(1.0f));
-            g.fillEllipse (rc.getX() + x - 2, y - 2, 4, 4);
+                g.setColour(juce::Colours::teal.withLightness(0.7f).withAlpha(1.0f));
+                g.fillEllipse (rc.getX() + x - 2, y - 2, 4, 4);
+            }
         }
     }
-
-    //draw a black rectangle around the background
-
 }
 
 void LFOComponent::timerCallback()

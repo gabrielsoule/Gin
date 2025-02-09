@@ -175,15 +175,15 @@ std::unique_ptr<gin::Parameter> Processor::createParam (juce::String uid, juce::
     return p;
 }
 
-gin::Parameter* Processor::addIntParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
-                                        juce::NormalisableRange<float> range, float defaultValue,
-                                        SmoothingType st,
-                                        juce::String tooltipPath,
-                                        std::function<juce::String (const gin::Parameter&, float)> textFunction)
+gin::Parameter* Processor::addIntParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     juce::String tooltipPath,
+                                     std::function<juce::String(const gin::Parameter&, float)> textFunction)
 {
-    jassert (! parameterMap.contains (uid));
+    jassert(!parameterMap.contains(uid));
 
-    if (auto p = createParam (
+    if (auto p = createParam(
         uid,
         name,
         shortName,
@@ -195,36 +195,76 @@ gin::Parameter* Processor::addIntParam (juce::String uid, juce::String name, juc
         textFunction))
     {
         auto rawPtr = p.get();
-        p->setInternal (true);
-        allParameters.add (rawPtr);
+        p->setInternal(true);
+        allParameters.add(rawPtr);
         parameterMap[p->getUid()] = rawPtr;
-        internalParameters.add (p.release());
+        internalParameters.add(p.release());
         return rawPtr;
     }
     return nullptr;
 }
 
-gin::Parameter* Processor::addExtParam (juce::String uid, juce::String name, juce::String shortName, juce::String label,
-                                        juce::NormalisableRange<float> range, float defaultValue,
-                                        SmoothingType st,
-                                        juce::String tooltipPath,
-                                        std::function<juce::String (const gin::Parameter&, float)> textFunction)
+// New overload for when neither tooltipPath nor textFunction are needed
+gin::Parameter* Processor::addIntParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     NoTextFunction)
 {
-    jassert (! parameterMap.contains (uid));
+    // Delegate to the full version with empty tooltip and no text function
+    return addIntParam(uid, name, shortName, label, range, defaultValue,
+                      st, "", std::function<juce::String(const gin::Parameter&, float)>());
+}
 
-    if (auto p = createParam (uid, name, shortName, label, range, defaultValue, st, tooltipPath, textFunction))
+// New overload for when tooltipPath isn't needed but textFunction is
+gin::Parameter* Processor::addIntParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     std::function<juce::String(const gin::Parameter&, float)> textFunction)
+{
+    // Delegate to the full version with empty tooltip
+    return addIntParam(uid, name, shortName, label, range, defaultValue,
+                      st, "", textFunction);
+}
+
+gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     juce::String tooltipPath,
+                                     std::function<juce::String(const gin::Parameter&, float)> textFunction)
+{
+    jassert(!parameterMap.contains(uid));
+
+    if (auto p = createParam(uid, name, shortName, label, range, defaultValue, st, tooltipPath, textFunction))
     {
         auto rawPtr = p.get();
-        allParameters.add (rawPtr);
+        allParameters.add(rawPtr);
         parameterMap[p->getUid()] = rawPtr;
        #if BUILD_INTERNAL_PLUGINS
-        addHostedParameter (std::move (p));
+        addHostedParameter(std::move(p));
        #else
-        addParameter (p.release());
+        addParameter(p.release());
        #endif
         return rawPtr;
     }
     return nullptr;
+}
+
+gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     NoTextFunction)
+{
+    return addExtParam(uid, name, shortName, label, range, defaultValue,
+                      st, "", std::function<juce::String(const gin::Parameter&, float)>());
+}
+
+gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                     juce::NormalisableRange<float> range, float defaultValue,
+                                     SmoothingType st,
+                                     std::function<juce::String(const gin::Parameter&, float)> textFunction)
+{
+    return addExtParam(uid, name, shortName, label, range, defaultValue,
+                      st, "", textFunction);
 }
 
 Parameter* Processor::getParameter (const juce::String& uid)
