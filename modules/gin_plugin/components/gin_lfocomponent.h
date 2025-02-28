@@ -14,6 +14,10 @@ public:
 
     void setParams (Parameter::Ptr wave, Parameter::Ptr sync, Parameter::Ptr rate,
                     Parameter::Ptr beat, Parameter::Ptr depth, Parameter::Ptr offset,
+                    Parameter::Ptr phase, Parameter::Ptr enable);
+
+    void setParams (Parameter::Ptr wave, Parameter::Ptr sync, Parameter::Ptr rate,
+                    Parameter::Ptr beat, Parameter::Ptr depth, Parameter::Ptr offset,
                     Parameter::Ptr phase, Parameter::Ptr enable, Parameter::Ptr stereo);
     
     std::function<std::vector<float>()> phaseCallback;
