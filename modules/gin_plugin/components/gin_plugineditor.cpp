@@ -667,7 +667,7 @@ ProcessorEditor::ProcessorEditor (Processor& p, int cx_, int cy_) noexcept
 
 ProcessorEditor::~ProcessorEditor()
 {
-    setLookAndFeel (nullptr);
+    // setLookAndFeel (nullptr);
 }
 
 void ProcessorEditor::handleAsyncUpdate()
