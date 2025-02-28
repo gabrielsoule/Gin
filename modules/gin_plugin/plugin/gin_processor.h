@@ -185,6 +185,16 @@ public:
                               SmoothingType st,
                               std::function<juce::String(const gin::Parameter&, float)> textFunction);
 
+    // Version for when you want tooltipPath but NO textFunction
+    gin::Parameter* addExtParam(juce::String uid,
+                              juce::String name,
+                              juce::String shortName,
+                              juce::String label,
+                              juce::NormalisableRange<float> range,
+                              float defaultValue,
+                              SmoothingType st,
+                              juce::String tooltipPath);
+
     gin::Parameter* addIntParam(juce::String uid,
                               juce::String name,
                               juce::String shortName,
@@ -214,6 +224,16 @@ public:
                               float defaultValue,
                               SmoothingType st,
                               std::function<juce::String(const gin::Parameter&, float)> textFunction);
+
+    // Version for when you want tooltipPath but NO textFunction
+    gin::Parameter* addIntParam(juce::String uid,
+                              juce::String name,
+                              juce::String shortName,
+                              juce::String label,
+                              juce::NormalisableRange<float> range,
+                              float defaultValue,
+                              SmoothingType st,
+                              juce::String tooltipPath);
 
     gin::Parameter* getParameter (const juce::String& uid);
     float parameterValue (const juce::String& uid);

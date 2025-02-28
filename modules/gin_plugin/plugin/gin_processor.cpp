@@ -226,6 +226,15 @@ gin::Parameter* Processor::addIntParam(juce::String uid, juce::String name, juce
                       st, "", textFunction);
 }
 
+gin::Parameter* Processor::addIntParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                    juce::NormalisableRange<float> range, float defaultValue,
+                                    SmoothingType st, juce::String tooltipPath)
+{
+    // Delegate to the full version with nullptr for the text function
+    return addIntParam(uid, name, shortName, label, range, defaultValue,
+                      st, tooltipPath, nullptr);
+}
+
 gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
                                      juce::NormalisableRange<float> range, float defaultValue,
                                      SmoothingType st,
@@ -265,6 +274,15 @@ gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce
 {
     return addExtParam(uid, name, shortName, label, range, defaultValue,
                       st, "", textFunction);
+}
+
+gin::Parameter* Processor::addExtParam(juce::String uid, juce::String name, juce::String shortName, juce::String label,
+                                    juce::NormalisableRange<float> range, float defaultValue,
+                                    SmoothingType st, juce::String tooltipPath)
+{
+    // Delegate to the full version with nullptr for the text function
+    return addExtParam(uid, name, shortName, label, range, defaultValue,
+                      st, tooltipPath, nullptr);
 }
 
 Parameter* Processor::getParameter (const juce::String& uid)
