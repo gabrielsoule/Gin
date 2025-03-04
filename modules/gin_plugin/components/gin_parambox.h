@@ -19,11 +19,11 @@ public:
         : name (name_)
     {
         setName (name);
-        font = juce::Font (juce::FontOptions()
+        font = juce::FontOptions()
             .withName("Jost*")
             .withPointHeight (14.0f)
             .withKerningFactor (0.08f)
-            .withStyle("Medium"));
+            .withStyle("Medium");
 
     }
 
@@ -50,7 +50,7 @@ private:
     }
 
     juce::String name;
-    juce::Font font;
+    juce::FontOptions font;
 };
 
 //==============================================================================
@@ -64,7 +64,7 @@ public:
     HeaderButton (const juce::String& name_, juce::Justification j = juce::Justification::centred)
         : juce::Button (name_), justification (j)
     {
-        font = juce::Font (juce::FontOptions().withName("Jost*").withPointHeight (14.0f).withKerningFactor (0.08f).withStyle("Medium"));
+        font = juce::FontOptions().withName("Jost*").withPointHeight (14.0f).withKerningFactor (0.08f).withStyle("Medium");
         stringLength = juce::GlyphArrangement::getStringWidth(font, name_);
     }
     
@@ -119,7 +119,7 @@ private:
     juce::Justification justification;
 
     int stringLength;
-    juce::Font font;
+    juce::FontOptions font;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderButton)
 };
