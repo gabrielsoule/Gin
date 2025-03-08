@@ -91,6 +91,11 @@ Switch::Switch (Parameter* p)
 
     name.setText (parameter->getShortName(), juce::dontSendNotification);
     name.setJustificationType (juce::Justification::centred);
+    
+    if (parameter->getTooltip().isNotEmpty())
+    {
+        button.setTooltip(parameter->getTooltip());
+    }
 }
 
 void Switch::resized()
