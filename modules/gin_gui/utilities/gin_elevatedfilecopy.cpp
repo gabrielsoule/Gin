@@ -115,6 +115,9 @@ juce::File ElevatedFileCopy::createScript (const juce::Array<juce::File>& toDele
 #endif
 
 #if JUCE_WINDOWS
+#include <windows.h>
+#include <shellapi.h>
+
 static std::wstring toWideString (const std::string& s)
 {
     int len = MultiByteToWideChar (CP_UTF8, 0, s.c_str(), (int)s.length() + 1, 0, 0);
