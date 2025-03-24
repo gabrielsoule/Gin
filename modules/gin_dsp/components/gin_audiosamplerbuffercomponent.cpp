@@ -228,7 +228,7 @@ void AudioSamplerBufferComponent::updatePixelCacheHiRes()
 
         for (auto samp = int (viewLeft) - 1; samp <= std::min (getViewRight () + 1.0f, buffer.getNumSamples() - 1.0f); samp++)
         {
-            v = samples[samp];
+            v = ( samp >= 0 && samp < buffer.getNumSamples () ) ? samples[samp] : 0.0f;
             auto x = sampleToX (samp);
             if (samp == int (viewLeft) - 1)
             {
@@ -302,7 +302,7 @@ void AudioSamplerBufferComponent::setViewBounds (float left, float right)
         if (right > buffer.getNumSamples())
         {
             left = buffer.getNumSamples() - (right - left);
-            right = buffer.getNumSamples();
+            right = float (buffer.getNumSamples());
 
             if (left < 0.0)
                 left = 0.0;
@@ -391,7 +391,7 @@ void AudioSamplerBufferComponent::setBuffer (const juce::AudioBuffer<float>& buf
 
     viewLeft    = 0.0;
     viewWidth   = buffer.getNumSamples() - 1.0f;
-    maxZoom     = buffer.getNumSamples();
+    maxZoom     = float (buffer.getNumSamples());
 
     setNumChannels (buffer.getNumChannels());
 

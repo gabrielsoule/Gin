@@ -9,6 +9,8 @@ public:
     ~AudioSamplerBufferComponent() override;
 
     void setBuffer (const juce::AudioSampleBuffer&);
+    const juce::AudioBuffer<float>& getBuffer ()    { return buffer;    }
+
     void clear ();
 
     void setScrollable (bool s)     { scrollable = s;                   }
@@ -30,6 +32,7 @@ public:
 
     float xToSample (float x);
     float sampleToX (int sample);
+    int lengthInSamples()                           { return buffer.getNumSamples ();   }
 
     void setLineColour (juce::Colour c)             { lineColour = c;   }
     void setBackgroundColour (juce::Colour c)       { bkColour = c;     }
