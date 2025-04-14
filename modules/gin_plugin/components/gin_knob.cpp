@@ -42,7 +42,7 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
     addMouseListener (this, true);
 
-    if (parameter->getModIndex() >= 0)
+    if (parameter->getModIndex() >= 0 && parameter->getModMatrix() != nullptr)
     {
         auto& mm = *parameter->getModMatrix();
         mm.addListener (this);
@@ -50,19 +50,12 @@ Knob::Knob (Parameter* p, bool fromCentre)
 
     modTimer.onTimer = [this] ()
     {
-        auto& mm = *parameter->getModMatrix();
         if (parameter == nullptr || parameter->getModMatrix() == nullptr)
         {
-            DBG("Parameter is null for knob " + getName());
-            // jassertfalse;
+            DBG("Parameter or ModMatrix is null for knob " + getName());
             return;
         }
-        if (parameter->getModMatrix() == nullptr)
-        {
-            DBG("Parameter is null for knob " + getName());
-            jassertfalse;
-            return;
-        }
+        auto& mm = *parameter->getModMatrix();
         if (mm.shouldShowLiveModValues())
         {
             auto curModValues = liveValuesCallback ? liveValuesCallback() : mm.getLiveValues (parameter, 0);
@@ -184,7 +177,7 @@ Knob::~Knob()
     modTimer.stopTimer();
     shiftTimer.stopTimer();
     stopTimer();
-    if (parameter->getModIndex() >= 0)
+    if (parameter != nullptr && parameter->getModIndex() >= 0 && parameter->getModMatrix() != nullptr)
     {
         auto& mm = *parameter->getModMatrix();
         mm.removeListener (this);
@@ -201,12 +194,16 @@ void Knob::showModMenu()
     juce::PopupMenu m;
     m.setLookAndFeel (&getLookAndFeel());
 
+    if (parameter == nullptr || parameter->getModMatrix() == nullptr)
+        return;
+
     auto& mm = *parameter->getModMatrix();
     for (auto src : mm.getModSources (parameter))
     {
         m.addItem ("Remove: " + mm.getModSrcName (src), [this, src]
         {
-            parameter->getModMatrix()->clearModDepth (src, ModDstId (parameter->getModIndex()));
+            if (parameter != nullptr && parameter->getModMatrix() != nullptr)
+                parameter->getModMatrix()->clearModDepth (src, ModDstId (parameter->getModIndex()));
         });
     }
 
@@ -298,6 +295,9 @@ void Knob::learnSourceChanged (ModSrcId src)
     bool shift = juce::ModifierKeys::getCurrentModifiersRealtime().isShiftDown();
     knob.setInterceptsMouseClicks (! learning || shift, ! learning || shift );
 
+    if (parameter == nullptr || parameter->getModMatrix() == nullptr)
+        return;
+
     auto& mm = *parameter->getModMatrix();
     modDepth = mm.getModDepth (mm.getLearn(), ModDstId (parameter->getModIndex()));
 
@@ -365,7 +365,7 @@ void Knob::modMatrixChanged()
 
 void Knob::mouseDown (const juce::MouseEvent& e)
 {
-    if (! isEnabled())
+    if (! isEnabled() || parameter == nullptr || parameter->getModMatrix() == nullptr)
         return;
 
     auto& mm = *parameter->getModMatrix();
@@ -466,6 +466,9 @@ void Knob::itemDropped (const SourceDetails& sd)
 {
     dragOver = false;
     repaint();
+
+    if (parameter == nullptr || parameter->getModMatrix() == nullptr)
+        return;
 
     auto& mm = *parameter->getModMatrix();
 
